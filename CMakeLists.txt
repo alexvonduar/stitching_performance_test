@@ -5,7 +5,7 @@ set(CMAKE_SYSTEM_VERSION 21)
 set(CMAKE_ANDROID_ARCH_ABI arm64-v8a)
 #set(ANDROID_ABI arm64-v8a)
 set(CMAKE_ANDROID_NDK /home/{$USER}/Android/Sdk/ndk-bundle)
-set(CMAKE_ANDROID_STL_TYPE c++_shared)
+set(CMAKE_ANDROID_STL_TYPE gnustl_shared)
 set(CMAKE_BUILD_TYPE Release)
 #set(ANDROID_NATIVE_API_LEVEL 21)
 #set(ANDROID_TOOLCHAIN clang)
@@ -54,7 +54,7 @@ add_library( computelibrary_core STATIC IMPORTED )
 set_target_properties( computelibrary_core PROPERTIES IMPORTED_LOCATION ${computelibrary_dir}/lib/android-${CMAKE_ANDROID_ARCH_ABI}-neon/libarm_compute_core-static.a )
 list(APPEND LIBS computelibrary_core)
 
-include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS} ${computelibrary_inc})
+include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS} ${computelibrary_inc} ${CMAKE_SOURCE_DIR})
 #include_directories(
 #  "${PROJECT_SOURCE_DIR}/include"
 #  "${EIGEN3_INCLUDE_DIR}"
@@ -62,7 +62,7 @@ include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS} ${computelibrary_inc})
 #  )
 
 add_executable(stitching_performance stitching_performance.cpp)
-target_link_libraries(stitching_performance ${LIBS} ${OpenCV_LIBRARIES})
+target_link_libraries(stitching_performance ${LIBS} ${OpenCV_LIBRARIES} log )
 
 add_executable(scale_performance scale_perf.cpp ${computelibrary_dir}/utils/Utils.cpp)
 target_link_libraries(scale_performance ${LIBS})
