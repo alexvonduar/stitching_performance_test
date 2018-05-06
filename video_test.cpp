@@ -14,8 +14,8 @@ static inline T get_msecs(struct timespec& start, struct timespec& stop)
     return (T)(mseconds);
 }
 
-static const int WIDTH = 640;
-static const int HEIGHT = 360;
+static const int WIDTH = 320;
+static const int HEIGHT = 180;
 
 #define USE_FASE_ORB 1
 
@@ -36,8 +36,8 @@ int main(int argc, char * argv[])
     struct timespec t;
     cv::Mat desc_ref;
     cv::Mat desc_cur;
-    cv::Ptr<cv::DescriptorMatcher> matcher = cv::BFMatcher::create();
-    cv::Ptr<cv::FeatureDetector> feature = cv::xfeatures2d::SIFT::create(1000);
+    cv::Ptr<cv::DescriptorMatcher> matcher = cv::BFMatcher::create(cv::NORM_HAMMING);
+    cv::Ptr<cv::FeatureDetector> feature = cv::ORB::create(1000, 1.2, 4, 8, 0, 2, 0, 8, 0);
     std::vector<cv::KeyPoint> kp_ref;
     std::vector<cv::KeyPoint> kp_cur;
     std::vector<cv::DMatch> matches;
@@ -49,7 +49,7 @@ int main(int argc, char * argv[])
 
     clock_gettime(CLOCK_MONOTONIC, &s);
     vin.open(argv[1]);
-    vout.open(argv[2], CV_FOURCC('a', 'v', 'c', '1'), 30, cv::Size(1280, 360));
+    vout.open(argv[2], CV_FOURCC('a', 'v', 'c', '1'), 30, cv::Size(WIDTH * 2, HEIGHT));
     clock_gettime(CLOCK_MONOTONIC, &t);
     std::cout << "take " << get_msecs<double>(s, t) << " ms to read image" << std::endl;
 
@@ -60,13 +60,13 @@ int main(int argc, char * argv[])
         std::cout << "fatal error: grab image error " << argv[1] << std::endl;
         return 0;
     }
-    
+
     if (!vin.retrieve(img)) {
         std::cout << "fatal error: read image error " << argv[1] << std::endl;
         return 0;
     }
 
-    cv::resize(img, ref, cv::Size(640, 360));
+    cv::resize(img, ref, cv::Size(WIDTH, HEIGHT));
 
     feature->detectAndCompute(ref, cv::Mat(), kp_ref, desc_ref);
     //if(desc_ref.type()!=CV_32F) {
@@ -77,7 +77,7 @@ int main(int argc, char * argv[])
     while (vin.grab()) {
         clock_gettime(CLOCK_MONOTONIC, &s);
         vin.retrieve(img);
-        cv::resize(img, cur, cv::Size(640, 360));
+        cv::resize(img, cur, cv::Size(WIDTH, HEIGHT));
         feature->detectAndCompute(cur, cv::Mat(), kp_cur, desc_cur);
         //if(desc_cur.type()!=CV_32F) {
         //    desc_cur.convertTo(desc_cur, CV_32F);
@@ -85,18 +85,27 @@ int main(int argc, char * argv[])
         matcher->match(desc_ref, desc_cur, matches);
         clock_gettime(CLOCK_MONOTONIC, &t);
         std::cout << "take " << get_msecs<double>(s, t) << " ms to convert image to gray" << std::endl;
+
+        //clock_gettime(CLOCK_MONOTONIC, &s);
+        //std::vector<cv::DMatch> gms_matches;
+        //cv::xfeatures2d::matchGMS(ref.size(), cur.size(), kp_ref, kp_cur, matches, gms_matches, true, true);
+        //clock_gettime(CLOCK_MONOTONIC, &t);
+        //std::cout << "take " << get_msecs<double>(s, t) << " ms to do gms" << std::endl;
+
         std::vector<cv::Point2f> X;
         std::vector<cv::Point2f> Y;
-
+        cv::Mat H;
+        std::vector<char> final_mask;
+        if (matches.size() > 20) {
+        clock_gettime(CLOCK_MONOTONIC, &t);
         for (int i = 0; i < matches.size(); ++i)
         {
            X.push_back(kp_ref[matches[i].queryIdx].pt); //Point2(matchings[i].first.x, matchings[i].first.y));
            Y.push_back(kp_cur[matches[i].trainIdx].pt); //(Point2(matchings[i].second.x, matchings[i].second.y));
         }
 
-        std::vector<char> final_mask(matches.size(), 0);
-        cv::Mat H = cv::findHomography(X, Y, CV_RANSAC, 1.0, final_mask);
-        clock_gettime(CLOCK_MONOTONIC, &t);
+        final_mask.resize(matches.size(), 0);
+        H = cv::findHomography(X, Y, CV_RANSAC, 1.0, final_mask);
         //tm.stop();
         int num_valid = 0;
         for (int i = 0; i < final_mask.size(); ++i) {
@@ -105,10 +114,22 @@ int main(int argc, char * argv[])
             }
         }
         std::cout << "take " << get_msecs<double>(s, t) << " ms to find homography:\n" << H << "\n valid matching " << num_valid << std::endl;
+        }
 
         cv::drawMatches(ref, kp_ref, cur, kp_cur, matches, matches_draw, cv::Scalar::all(-1), cv::Scalar::all(-1), final_mask);
+        clock_gettime(CLOCK_MONOTONIC, &s);
         std::vector<cv::Point2f> polyf;
-        gen_poly(WIDTH, HEIGHT, H, polyf);
+        if (!H.empty()) {
+            cv::Rect roi(0, 0, 2, 2);
+            cv::Mat first2 = H(roi);
+            if (cv::determinant(first2) > 0) {
+                gen_poly(WIDTH, HEIGHT, H, polyf);
+            } else {
+                std::cout << "bad homography " << std::endl;
+            }
+        }
+        clock_gettime(CLOCK_MONOTONIC, &t);
+        std::cout << "take " << get_msecs<double>(s, t) << " ms to find poly" << std::endl;
         if (polyf.size()) {
         cv::Mat weights_img = cv::Mat::ones(matches_draw.size(), CV_32FC1);
         cv::Mat weights_mask = cv::Mat::zeros(matches_draw.size(), CV_32FC1);
