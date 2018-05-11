@@ -21,7 +21,7 @@ set(OpenCV_LIBRARIES
     ${OpenCV_LIB_DIRS}/libopencv_features2d.so)
 endif()
 
-include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS} )
+include_directories(SYSTEM ${OpenCV_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR} )
 
 if (CMAKE_SYSTEM_NAME EQUAL "Android")
 
@@ -79,5 +79,9 @@ target_link_libraries(fastorb ${LIBS})
 
 endif()
 
-add_executable(video_test video_test.cpp)
+add_executable(video_test video_test.cpp ORBextractor.cc)
 target_link_libraries(video_test ${LIBS} ${OpenCV_LIBRARIES})
+
+add_executable(show_homography show_homography.cpp)
+target_link_libraries(show_homography ${LIBS} ${OpenCV_LIBRARIES})
+
