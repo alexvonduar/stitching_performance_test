@@ -17,7 +17,7 @@ static inline void show_tensor_info(const arm_compute::Tensor& t)
     std::cout << "stride " << info->strides_in_bytes().x() << " " << info->strides_in_bytes().y()
 	          << " " << info->strides_in_bytes().z() << std::endl;
 	std::cout << "first element offset " << info->offset_first_element_in_bytes() << std::endl;
-	std::cout << "fixed point position " << info->fixed_point_position() << std::endl;
+	//std::cout << "fixed point position " << info->fixed_point_position() << std::endl;
 	std::cout << "has padding " << info->has_padding() << std::endl;
 	if (info->has_padding()) {
 		std::cout << info->padding().top << " "
@@ -37,7 +37,7 @@ static inline void show_tensor_info(const arm_compute::Tensor * t)
     std::cout << "stride " << info->strides_in_bytes().x() << " " << info->strides_in_bytes().y()
 	          << " " << info->strides_in_bytes().z() << std::endl;
 	std::cout << "first element offset " << info->offset_first_element_in_bytes() << std::endl;
-	std::cout << "fixed point position " << info->fixed_point_position() << std::endl;
+	//std::cout << "fixed point position " << info->fixed_point_position() << std::endl;
 	std::cout << "has padding " << info->has_padding() << std::endl;
 	if (info->has_padding()) {
 		std::cout << info->padding().top << " "

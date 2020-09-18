@@ -27,27 +27,27 @@ namespace pislam {
 
 template <int vstep, int rot, int dx0, int dy0, int dx1, int dy1>
 bool briefBit(uint8_t base[][vstep]) {
-  constexpr float theta = (rot * M_PI / 15);
-  constexpr float c = cosf(theta);
-  constexpr float s = sinf(theta);
+  /*constexpr*/ float theta = (rot * M_PI / 15);
+  /*constexpr*/ float c = cosf(theta);
+  /*constexpr*/ float s = sinf(theta);
 
   // rotate pattern
-  constexpr int rdx0 = roundf(c*dx0-s*dy0);
-  constexpr int rdy0 = roundf(s*dx0+c*dy0);
-  constexpr int rdx1 = roundf(c*dx1-s*dy1);
-  constexpr int rdy1 = roundf(s*dx1+c*dy1);
+  /*constexpr*/ int rdx0 = roundf(c*dx0-s*dy0);
+  /*constexpr*/ int rdy0 = roundf(s*dx0+c*dy0);
+  /*constexpr*/ int rdx1 = roundf(c*dx1-s*dy1);
+  /*constexpr*/ int rdy1 = roundf(s*dx1+c*dy1);
 
   // don't rotate the bit pattern outside the 31x31 pixel block.
   // std::min/max not constexpr until c++14
-  constexpr int mindx0 = rdx0 < -15 ? -15 : rdx0;
-  constexpr int mindy0 = rdy0 < -15 ? -15 : rdy0;
-  constexpr int mindx1 = rdx1 < -15 ? -15 : rdx1;
-  constexpr int mindy1 = rdy1 < -15 ? -15 : rdy1;
+  /*constexpr*/ int mindx0 = rdx0 < -15 ? -15 : rdx0;
+  /*constexpr*/ int mindy0 = rdy0 < -15 ? -15 : rdy0;
+  /*constexpr*/ int mindx1 = rdx1 < -15 ? -15 : rdx1;
+  /*constexpr*/ int mindy1 = rdy1 < -15 ? -15 : rdy1;
 
-  constexpr int cdx0 = mindx0 > 15 ? 15 : mindx0;
-  constexpr int cdy0 = mindy0 > 15 ? 15 : mindy0;
-  constexpr int cdx1 = mindx1 > 15 ? 15 : mindx1;
-  constexpr int cdy1 = mindy1 > 15 ? 15 : mindy1;
+  /*constexpr*/ int cdx0 = mindx0 > 15 ? 15 : mindx0;
+  /*constexpr*/ int cdy0 = mindy0 > 15 ? 15 : mindy0;
+  /*constexpr*/ int cdx1 = mindx1 > 15 ? 15 : mindx1;
+  /*constexpr*/ int cdy1 = mindy1 > 15 ? 15 : mindy1;
 
   return base[cdy0][cdx0] < base[cdy1][cdx1];
 }

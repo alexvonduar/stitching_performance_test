@@ -71,11 +71,12 @@ static inline bool good_hom(const cv::Mat &H)
 }
 
 #if defined(USE_OPTF)
-void drawPoints(const cv::Mat& ref, const std::vector<cv::KeyPoint> &kp, cv::Mat& output)
+void drawPoints(const cv::Mat &ref, const std::vector<cv::KeyPoint> &kp, cv::Mat &output)
 {
     output = cv::Mat(ref.size(), ref.type());
     ref.copyTo(output);
-    for (int i = 0; i < kp.size(); ++i) {
+    for (int i = 0; i < kp.size(); ++i)
+    {
         cv::Scalar clr = cv::Scalar(std::rand() % 255, std::rand() % 255, std::rand() % 255);
         cv::circle(output, kp[i].pt, 3, clr);
     }
@@ -84,7 +85,7 @@ void drawPoints(const cv::Mat& ref, const std::vector<cv::KeyPoint> &kp, cv::Mat
 template <typename T>
 void drawOpticalFlowPoints(const cv::Mat &ref, const std::vector<cv::Point2f> &kp1,
                            const cv::Mat &cur, const std::vector<cv::Point2f> &kp2,
-                           const std::vector<T> &status, cv::Mat& output)
+                           const std::vector<T> &status, cv::Mat &output)
 {
     //
     int width = ref.cols;
@@ -146,7 +147,7 @@ int main(int argc, char *argv[])
 
     clock_gettime(CLOCK_MONOTONIC, &s);
     vin.open(argv[1]);
-    vout.open(argv[2], CV_FOURCC('a', 'v', 'c', '1'), 30, cv::Size(WIDTH * 2, HEIGHT));
+    vout.open(argv[2], cv::VideoWriter::fourcc('a', 'v', 'c', '1'), 30, cv::Size(WIDTH * 2, HEIGHT));
     clock_gettime(CLOCK_MONOTONIC, &t);
     std::cout << "take " << get_msecs<double>(s, t) << " ms to read image" << std::endl;
 
@@ -170,7 +171,7 @@ int main(int argc, char *argv[])
 
 #if defined(USE_OPTF)
     //cv::Mat img_gray;
-    cv::cvtColor(img, ref_gray, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(img, ref_gray, cv::ColorConversionCodes::COLOR_BGR2GRAY);
     cv::resize(ref_gray, ref_gray, cv::Size(WIDTH, HEIGHT));
 #endif
     cv::resize(img, ref, cv::Size(WIDTH, HEIGHT));
@@ -190,6 +191,13 @@ int main(int argc, char *argv[])
     cv::Mat cur;
 #if defined(USE_OPTF)
     cv::Mat cur_gray;
+    std::vector<cv::Point2f> p_ref;
+    std::vector<cv::Point2f> p_cur;
+    for (int i = 0; i < kp_ref.size(); ++i)
+    {
+        p_ref.push_back(kp_ref[i].pt);
+        p_cur.push_back(kp_ref[i].pt);
+    }
 #endif
     while (vin.grab())
     {
@@ -205,13 +213,7 @@ int main(int argc, char *argv[])
         //kp_cur.clear();
         std::vector<uchar> status;
         std::vector<float> err;
-        std::vector<cv::Point2f> p_ref;
-        std::vector<cv::Point2f> p_cur;
-        for (int i = 0; i < kp_ref.size(); ++i)
-        {
-            p_ref.push_back(kp_ref[i].pt);
-            p_cur.push_back(kp_ref[i].pt);
-        }
+
         cv::calcOpticalFlowPyrLK(ref_gray, cur_gray, p_ref, p_cur, status, err, cv::Size(10, 10), 3,
                                  cv::TermCriteria(cv::TermCriteria::COUNT + cv::TermCriteria::EPS, 30, 0.01),
                                  0, 1e-4);
@@ -233,7 +235,7 @@ int main(int argc, char *argv[])
         final_mask.resize(vp_cur.size(), 0);
         if (vp_ref.size() > 20)
         {
-            H = cv::findHomography(vp_ref, vp_cur, CV_RANSAC, 3.0, final_mask, 2000, 0.9999);
+            H = cv::findHomography(vp_ref, vp_cur, cv::RANSAC, 3.0, final_mask, 2000, 0.9999);
         }
         H.convertTo(H, CV_32FC1);
 

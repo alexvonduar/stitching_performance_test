@@ -14,8 +14,8 @@
 
 #include "neonorb.hpp"
 
-template<typename T>
-static inline T get_msecs(struct timespec& start, struct timespec& stop)
+template <typename T>
+static inline T get_msecs(struct timespec &start, struct timespec &stop)
 {
     long long seconds = stop.tv_sec - start.tv_sec;
     long long nseconds = stop.tv_nsec - start.tv_nsec;
@@ -29,7 +29,7 @@ static const int H = 480;
 
 #define USE_FASE_ORB 1
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
     //cv::TickMeter tm;
     struct timespec s;
@@ -60,31 +60,44 @@ int main(int argc, char * argv[])
 
     clock_gettime(CLOCK_MONOTONIC, &s);
 
-    if (src_img1.channels() == 3) {
+    if (src_img1.channels() == 3)
+    {
         cv::resize(src_img1, src_img1, cv::Size(W, H));
-        cv::cvtColor(src_img1, img1, CV_BGR2GRAY);
-    } else if (src_img1.channels() == 4) {
+        cv::cvtColor(src_img1, img1, cv::COLOR_BGR2GRAY);
+    }
+    else if (src_img1.channels() == 4)
+    {
         cv::resize(src_img1, src_img1, cv::Size(W, H));
-        cv::cvtColor(src_img1, img1, CV_BGRA2GRAY);
-    } else if (src_img1.channels() == 1) {
+        cv::cvtColor(src_img1, img1, cv::COLOR_BGRA2GRAY);
+    }
+    else if (src_img1.channels() == 1)
+    {
         cv::resize(src_img1, img1, cv::Size(W, H));
     }
 
-    if (src_img2.channels() == 3) {
+    if (src_img2.channels() == 3)
+    {
         cv::resize(src_img2, src_img2, cv::Size(W, H));
-        cv::cvtColor(src_img2, img2, CV_BGR2GRAY);
-    } else if (src_img2.channels() == 4) {
+        cv::cvtColor(src_img2, img2, cv::COLOR_BGR2GRAY);
+    }
+    else if (src_img2.channels() == 4)
+    {
         cv::resize(src_img2, src_img2, cv::Size(W, H));
-        cv::cvtColor(src_img2, img2, CV_BGRA2GRAY);
-    } else if (src_img2.channels() == 1) {
+        cv::cvtColor(src_img2, img2, cv::COLOR_BGRA2GRAY);
+    }
+    else if (src_img2.channels() == 1)
+    {
         cv::resize(src_img2, img2, cv::Size(W, H));
     }
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    std::cout << "take " << get_msecs<double>(s, t) << " ms to convert image to gray" << std::endl;
 
+    clock_gettime(CLOCK_MONOTONIC, &s);
     fast_orb_640x480_downscale(data1, 8);
     fast_orb_640x480_downscale(data2, 8);
 
     clock_gettime(CLOCK_MONOTONIC, &t);
-    std::cout << "take " << get_msecs<double>(s, t) << " ms to convert image to gray" << std::endl;
+    std::cout << "take " << get_msecs<double>(s, t) << " ms to downscale" << std::endl;
 
     clock_gettime(CLOCK_MONOTONIC, &s);
     std::vector<uint32_t> desc1;
@@ -109,11 +122,13 @@ int main(int argc, char * argv[])
 #if 0
     matcher->match(descriptor1, descriptor2, matches);
 #else
-    if(descriptor1.type()!=CV_32F) {
+    if (descriptor1.type() != CV_32F)
+    {
         descriptor1.convertTo(descriptor1, CV_32F);
     }
 
-    if(descriptor2.type()!=CV_32F) {
+    if (descriptor2.type() != CV_32F)
+    {
         descriptor2.convertTo(descriptor2, CV_32F);
     }
     flann->match(descriptor1, descriptor2, matches);
@@ -134,22 +149,30 @@ int main(int argc, char * argv[])
     }
 
     std::vector<char> final_mask(matches.size(), 0);
-    cv::Mat H = cv::findHomography(X, Y, CV_RANSAC, 3.0, final_mask);
+    cv::Mat H = cv::findHomography(X, Y, cv::RANSAC, 3.0, final_mask);
     clock_gettime(CLOCK_MONOTONIC, &t);
     //tm.stop();
     int num_valid = 0;
-    for (int i = 0; i < final_mask.size(); ++i) {
-        if (final_mask[i] > 0) {
+    for (int i = 0; i < final_mask.size(); ++i)
+    {
+        if (final_mask[i] > 0)
+        {
             num_valid++;
         }
     }
-    std::cout << "take " << get_msecs<double>(s, t) << " ms to find homography:\n" << H << "\n valid matching " << num_valid << std::endl;
+    std::cout << "take " << get_msecs<double>(s, t) << " ms to find homography:\n"
+              << H << "\n valid matching " << num_valid << std::endl;
 
     cv::drawMatches(img1, keypoints1, img2, keypoints2, matches, matches_draw, cv::Scalar::all(-1), cv::Scalar::all(-1), final_mask);
-    if (argc > 3) {
+    if (argc > 3)
+    {
         cv::imwrite(argv[3], matches_draw);
-    } else {
+    }
+#if !defined(__ANDROID__)
+    else
+    {
         cv::imshow("matches", matches_draw);
         cv::waitKey();
     }
+#endif
 }

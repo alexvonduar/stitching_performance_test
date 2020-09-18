@@ -24,7 +24,7 @@
 #include "arm_compute/runtime/NEON/NEFunctions.h"
 
 #include "arm_compute/core/Types.h"
-#include "utils/Utils.h"
+#include "utils/ImageLoader.h"
 
 using namespace arm_compute;
 using namespace utils;
@@ -32,7 +32,7 @@ using namespace utils;
 class NEONScaleExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         PPMLoader ppm;
 

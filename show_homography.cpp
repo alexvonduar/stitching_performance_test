@@ -36,8 +36,8 @@ int main(int argc, char **argv)
     gen_output(img, H, WIDTH, HEIGHT);
 
     /// Create Window
-    char *source_window = "Source";
-    cv::namedWindow(source_window, CV_WINDOW_AUTOSIZE);
+    std::string source_window("Source");
+    cv::namedWindow(source_window, cv::WINDOW_AUTOSIZE);
     cv::imshow(source_window, img);
 
     cv::createTrackbar(" sx:", "Source", &sx, MAX_SX, sx_callback);
@@ -60,7 +60,7 @@ void sx_callback(int, void *)
     gen_output(img, H, WIDTH, HEIGHT);
 
     /// Show in a window
-    cv::namedWindow("Source", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Source", cv::WINDOW_AUTOSIZE);
     cv::imshow("Source", img);
 }
 
@@ -75,7 +75,7 @@ void sy_callback(int, void *)
     gen_output(img, H, WIDTH, HEIGHT);
 
     /// Show in a window
-    cv::namedWindow("Source", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Source", cv::WINDOW_AUTOSIZE);
     cv::imshow("Source", img);
 }
 
@@ -89,7 +89,7 @@ void sheer_callback(int, void *)
     gen_output(img, H, WIDTH, HEIGHT);
 
     /// Show in a window
-    cv::namedWindow("Source", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("Source", cv::WINDOW_AUTOSIZE);
     cv::imshow("Source", img);
 }
 

@@ -2,7 +2,8 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include "arm_compute/core/Types.h"
-#include "utils/Utils.h"
+#include "utils/ImageLoader.h"
+//#include "utils/Utils.h"
 
 //using namespace arm_compute;
 //using namespace utils;
